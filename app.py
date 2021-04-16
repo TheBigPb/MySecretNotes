@@ -2,12 +2,11 @@ import json, sqlite3, click, functools, os, hashlib,time, random, sys
 from flask import Flask, current_app, g, session, redirect, render_template, url_for, request
 
 
-
-
-### DATABASE FUNCTIONS ###
+# DATABASE FUNCTIONS #
 
 def connect_db():
     return sqlite3.connect(app.database)
+
 
 def init_db():
     """Initializes the database with our great SQL schema"""
@@ -40,13 +39,13 @@ INSERT INTO notes VALUES(null,2,"1993-09-23 12:10:10","i want lunch pls",1234567
 """)
 
 
-
-### APPLICATION SETUP ###
+# APPLICATION SETUP #
 app = Flask(__name__)
 app.database = "db.sqlite3"
 app.secret_key = os.urandom(32)
 
-### ADMINISTRATOR'S PANEL ###
+
+# ADMINISTRATOR'S PANEL #
 def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
@@ -54,6 +53,7 @@ def login_required(view):
             return redirect(url_for('login'))
         return view(**kwargs)
     return wrapped_view
+
 
 @app.route("/")
 def index():
@@ -67,7 +67,7 @@ def index():
 @login_required
 def notes():
     importerror=""
-    #Posting a new note:
+    # Posting a new note:
     if request.method == 'POST':
         if request.form['submit_button'] == 'add note':
             note = request.form['noteinput']
@@ -85,7 +85,7 @@ def notes():
             statement = """SELECT * from NOTES where publicID = %s""" %noteid
             c.execute(statement)
             result = c.fetchall()
-            if(len(result)>0):
+            if len(result)>0:
                 row = result[0]
                 statement = """INSERT INTO notes(id,assocUser,dateWritten,note,publicID) VALUES(null,%s,'%s','%s',%s);""" %(session['userid'],row[2],row[3],row[4])
                 c.execute(statement)
@@ -134,8 +134,6 @@ def register():
     usererror = ""
     passworderror = ""
     if request.method == 'POST':
-        
-
         username = request.form['username']
         password = request.form['password']
         db = connect_db()
@@ -143,16 +141,16 @@ def register():
         pass_statement = """SELECT * FROM users WHERE password = '%s';""" %password
         user_statement = """SELECT * FROM users WHERE username = '%s';""" %username
         c.execute(pass_statement)
-        if(len(c.fetchall())>0):
+        if len(c.fetchall())>0:
             errored = True
             passworderror = "That password is already in use by someone else!"
 
         c.execute(user_statement)
-        if(len(c.fetchall())>0):
+        if len(c.fetchall())>0:
             errored = True
             usererror = "That username is already in use by someone else!"
 
-        if(not errored):
+        if not errored:
             statement = """INSERT INTO users(id,username,password) VALUES(null,'%s','%s');""" %(username,password)
             print(statement)
             c.execute(statement)
@@ -180,15 +178,16 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
+
 if __name__ == "__main__":
-    #create database if it doesn't exist yet
+    # Create database if it doesn't exist yet
     if not os.path.exists(app.database):
         init_db()
     runport = 5000
-    if(len(sys.argv)==2):
+    if len(sys.argv)==2:
         runport = sys.argv[1]
     try:
-        app.run(host='0.0.0.0', port=runport) # runs on machine ip address to make it visible on netowrk
+        app.run(host='0.0.0.0', port=runport)  # runs on machine ip address to make it visible on netowrk
     except:
         print("Something went wrong. the usage of the server is either")
         print("'python3 app.py' (to start on port 5000)")
