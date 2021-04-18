@@ -1,5 +1,8 @@
+import base64
 import json, sqlite3, click, functools, os, hashlib,time, random, sys
-from flask import Flask, current_app, g, session, redirect, render_template, url_for, request
+import pickle
+
+from flask import Flask, current_app, g, session, redirect, render_template, url_for, request, make_response
 
 
 # DATABASE FUNCTIONS #
@@ -96,9 +99,13 @@ def notes():
     c = db.cursor()
     c.execute("SELECT * FROM notes WHERE assocUser = (?);", (session['userid'], ))
     notes = c.fetchall()
-    print(notes)
+
+    if 'username_pickled' in request.cookies:
+        username_pickled = base64.urlsafe_b64decode(request.cookies.get('username_pickled'))
+        username = pickle.loads(username_pickled)
+        return render_template('notes.html', username=username, notes=notes, importerror=importerror)
     
-    return render_template('notes.html',notes=notes,importerror=importerror)
+    return render_template('notes.html', notes=notes, importerror=importerror)
 
 
 @app.route("/login/", methods=('GET', 'POST'))
@@ -116,11 +123,14 @@ def login():
             session.clear()
             session['logged_in'] = True
             session['userid'] = result[0][0]
-            session['username']=result[0][1]
-            return redirect(url_for('index'))
+            session['username'] = result[0][1]
+            resp = make_response(redirect(url_for('index')))
+            username_picked = base64.urlsafe_b64encode(pickle.dumps(session['username']))
+            resp.set_cookie('username_pickled', username_picked)
+            return resp
         else:
             error = "Wrong username or password!"
-    return render_template('login.html',error=error)
+    return render_template('login.html', error=error)
 
 
 @app.route("/register/", methods=('GET', 'POST'))
