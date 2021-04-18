@@ -21,7 +21,7 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS notes;
 
 CREATE TABLE notes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     assocUser INTEGER NOT NULL,
     dateWritten DATETIME NOT NULL,
     note TEXT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE notes (
 );
 
 CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     username TEXT NOT NULL,
     password TEXT NOT NULL
 );
@@ -44,7 +44,7 @@ INSERT INTO notes VALUES(null,2,"1993-09-23 12:10:10","i want lunch pls",1234567
 
 # APPLICATION SETUP #
 app = Flask(__name__)
-app.database = "db.sqlite3"
+app.database = "notesdb.sqlite3"
 app.secret_key = os.urandom(32)
 
 
@@ -148,7 +148,7 @@ def register():
             errored = True
             passworderror = "That password is already in use by someone else!"
 
-        c.execute("SELECT * FROM users WHERE username = (?;", (username,))
+        c.execute("SELECT * FROM users WHERE username = (?);", (username,))
         if len(c.fetchall())>0:
             errored = True
             usererror = "That username is already in use by someone else!"
