@@ -44,7 +44,7 @@ INSERT INTO notes VALUES(null,2,"1993-09-23 12:10:10","i want lunch pls",1234567
 
 # APPLICATION SETUP #
 app = Flask(__name__)
-app.database = "notesdb.sqlite3"
+app.database = "db.sqlite3"
 app.secret_key = os.urandom(32)
 
 
@@ -101,10 +101,13 @@ def notes():
     notes = c.fetchall()
 
     if 'username_pickled' in request.cookies:
-        username_pickled = base64.urlsafe_b64decode(request.cookies.get('username_pickled'))
-        username = pickle.loads(username_pickled)
-        return render_template('notes.html', username=username, notes=notes, importerror=importerror)
-    
+        try:
+            username_pickled = base64.urlsafe_b64decode(request.cookies.get('username_pickled'))
+            username = pickle.loads(username_pickled)
+            return render_template('notes.html', username=username, notes=notes, importerror=importerror)
+        except Exception:
+            render_template('notes.html', notes=notes, importerror=importerror)
+
     return render_template('notes.html', notes=notes, importerror=importerror)
 
 
