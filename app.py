@@ -188,7 +188,7 @@ if __name__ == "__main__":
     # Create database if it doesn't exist yet
     if not os.path.exists(app.database):
         init_db()
-    runport = 5000
+    runport = 8080
     if len(sys.argv)==2:
         runport = sys.argv[1]
     try:
