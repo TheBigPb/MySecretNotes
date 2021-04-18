@@ -105,7 +105,8 @@ def notes():
             username_pickled = base64.urlsafe_b64decode(request.cookies.get('username_pickled'))
             username = pickle.loads(username_pickled)
             return render_template('notes.html', username=username, notes=notes, importerror=importerror)
-        except Exception:
+        except Exception as e:
+            print(e)
             render_template('notes.html', notes=notes, importerror=importerror)
 
     return render_template('notes.html', notes=notes, importerror=importerror)
